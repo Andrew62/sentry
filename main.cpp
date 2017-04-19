@@ -29,8 +29,15 @@
 int main(int argc, const char * argv[]) {
     
     std::cout << "Starting Sentry" << std::endl;
-    if (argc == 2){
-        std::cout << "Saving images to: " << argv[1] << std::endl;
+    if (argc < 3){
+        std::cout << "call the program like this: ./Sentry shape_predictor_68_face_landmarks.dat /out/data/folder" << std::endl;
+        return 0;
+    } else if (argc == 3){
+        std::cout << "Loading shape predictor from: " << argv[1] << std::endl;
+        std::cout << "Saving images to: " << argv[2] << std::endl;
+    } else {
+        std::cout << "Too many arguments!" << std::endl;
+        return 0;
     }
     
     struct sockaddr_storage their_addr;
@@ -62,6 +69,10 @@ int main(int argc, const char * argv[]) {
     // initialize the detector
     dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
     
+    dlib::shape_predictor sp;
+    
+    dlib::deserialize(argv[1]) >> sp;
+    
     std::cout << "Capturing..." << std::endl;
     
     // for writing out images 
@@ -84,11 +95,21 @@ int main(int argc, const char * argv[]) {
             
             std::cout << "Number of detections: " << detections.size() << std::endl;
             
-            if (argc == 2){
-                utils::save_chips(argv[1], image_id, d_image, detections);
-            }
+            if (detections.size() > 0){
+                std::vector<dlib::chip_details> shapes;
+                for (int idx = 0; idx < detections.size(); idx++){
+                    dlib::chip_details details(detections[idx]);
+                    shapes.push_back(details);
+                }
+                dlib::array<dlib::array2d<dlib::bgr_pixel>> face_chips;
+                dlib::extract_image_chips(d_image, shapes, face_chips);
+                for (int idx = 0; idx < face_chips.size(); idx++){
+                    std::string fname = argv[2] + std::to_string(image_id) + ".jpg";
+                    dlib::save_jpeg(face_chips[idx], fname);
+                    image_id++;
+                }
 
-            image_id++;
+            }
             
             // clear the raw image b/c the size might change(?)
             // not sure if i need to do this

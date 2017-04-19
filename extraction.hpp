@@ -17,15 +17,7 @@
 
 // consolidating image operations
 namespace utils {
-    void get_face_chips(const dlib::cv_image<dlib::bgr_pixel>& img,
-                        const std::vector<dlib::rectangle>& detections,
-                        dlib::array<dlib::array2d<dlib::bgr_pixel>>& chips);
-    
     dlib::cv_image<dlib::bgr_pixel> process_frame(cv::Mat& rawImage);
-    
-    void save_chips(const char* outdir, int& imageId,
-                     dlib::cv_image<dlib::bgr_pixel>& d_image,
-                     std::vector<dlib::rectangle>& detections);
 };
 
 #endif /* extraction_hpp */
