@@ -7,11 +7,10 @@
 //
 
 #include "extraction.hpp"
-#include <dlib/opencv.h>
 #include <opencv2/opencv.hpp>
 
 
-dlib::cv_image<dlib::bgr_pixel> utils::process_frame(cv::Mat& rawImage){
+void utils::process_frame(cv::Mat& rawImage, cv::Mat& processed){
     // decode data stream
     cv::Mat img = cv::imdecode(rawImage, CV_LOAD_IMAGE_COLOR);
     
@@ -19,10 +18,7 @@ dlib::cv_image<dlib::bgr_pixel> utils::process_frame(cv::Mat& rawImage){
     cv::flip(img, img, 1);
     cv::transpose(img, img);
     
-    cv::resize(img, img, cv::Size(), 2, 2, cv::INTER_CUBIC);
-    
-    dlib::cv_image<dlib::bgr_pixel> d_image(img);
-    return d_image;
+    cv::resize(img, processed, cv::Size(), 2, 2, cv::INTER_CUBIC);
 }
 
 

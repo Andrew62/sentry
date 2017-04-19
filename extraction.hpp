@@ -10,14 +10,11 @@
 #define extraction_hpp
 
 #include <stdio.h>
-#include <dlib/opencv.h>
-#include <dlib/image_io.h>
-#include <dlib/image_processing.h>
-
+#include <opencv2/opencv.hpp>
 
 // consolidating image operations
 namespace utils {
-    dlib::cv_image<dlib::bgr_pixel> process_frame(cv::Mat& rawImage);
+    void process_frame(cv::Mat& rawImage, cv::Mat& processed);
 };
 
 #endif /* extraction_hpp */

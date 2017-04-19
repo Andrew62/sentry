@@ -29,15 +29,9 @@
 int main(int argc, const char * argv[]) {
     
     std::cout << "Starting Sentry" << std::endl;
-    if (argc < 3){
-        std::cout << "call the program like this: ./Sentry shape_predictor_68_face_landmarks.dat /out/data/folder" << std::endl;
-        return 0;
-    } else if (argc == 3){
-        std::cout << "Loading shape predictor from: " << argv[1] << std::endl;
-        std::cout << "Saving images to: " << argv[2] << std::endl;
-    } else {
-        std::cout << "Too many arguments!" << std::endl;
-        return 0;
+    
+    if (argc == 2){
+        std::cout << "Saving images to: " << argv[1] << std::endl;
     }
     
     struct sockaddr_storage their_addr;
@@ -66,12 +60,11 @@ int main(int argc, const char * argv[]) {
     // object to store raw image data
     cv::Mat rawImage;
     
+    // for the processed data
+    cv::Mat processed;
+    
     // initialize the detector
     dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
-    
-    dlib::shape_predictor sp;
-    
-    dlib::deserialize(argv[1]) >> sp;
     
     std::cout << "Capturing..." << std::endl;
     
@@ -89,31 +82,31 @@ int main(int argc, const char * argv[]) {
 
             sockt.getData(rawImage.data, image_size, MSG_WAITALL);
             
-            dlib::cv_image<dlib::bgr_pixel> d_image = utils::process_frame(rawImage);
+            utils::process_frame(rawImage, processed);
+            
+            dlib::cv_image<dlib::bgr_pixel> d_image(processed);
             
             std::vector<dlib::rectangle> detections = detector(d_image);
             
             std::cout << "Number of detections: " << detections.size() << std::endl;
             
             if (detections.size() > 0){
-                std::vector<dlib::chip_details> shapes;
                 for (int idx = 0; idx < detections.size(); idx++){
                     dlib::chip_details details(detections[idx]);
-                    shapes.push_back(details);
+                    dlib::array2d<dlib::bgr_pixel> chip;
+                    dlib::extract_image_chip(d_image, details, chip);
+                    if (argc==2){
+                        std::string fname = argv[1] + std::to_string(image_id) + ".jpg";
+                        dlib::save_jpeg(chip, fname);
+                        image_id++;
+                    }
                 }
-                dlib::array<dlib::array2d<dlib::bgr_pixel>> face_chips;
-                dlib::extract_image_chips(d_image, shapes, face_chips);
-                for (int idx = 0; idx < face_chips.size(); idx++){
-                    std::string fname = argv[2] + std::to_string(image_id) + ".jpg";
-                    dlib::save_jpeg(face_chips[idx], fname);
-                    image_id++;
-                }
-
             }
             
             // clear the raw image b/c the size might change(?)
             // not sure if i need to do this
             memset(&rawImage, 0x0, sizeof(rawImage));
+            memset(&processed, 0x0, sizeof(processed));
             
         } else {
             std::cout << "No message yet" << std::endl;
