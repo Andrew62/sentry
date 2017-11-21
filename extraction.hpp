@@ -15,6 +15,7 @@
 // consolidating image operations
 namespace utils {
     void process_frame(cv::Mat& rawImage, cv::Mat& processed);
+    std::string get_datestamp();
 };
 
 #endif /* extraction_hpp */

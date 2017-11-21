@@ -70,6 +70,7 @@ int main(int argc, const char * argv[]) {
     
     // for writing out images 
     int image_id = 1;
+    std::string base_stamp = utils::get_datestamp();
     
     while (true){
         
@@ -96,7 +97,7 @@ int main(int argc, const char * argv[]) {
                     dlib::array2d<dlib::bgr_pixel> chip;
                     dlib::extract_image_chip(d_image, details, chip);
                     if (argc==2){
-                        std::string fname = argv[1] + std::to_string(image_id) + ".jpg";
+                        std::string fname = argv[1] + base_stamp + "_" + std::to_string(image_id) + ".jpg";
                         dlib::save_jpeg(chip, fname);
                         image_id++;
                     }
